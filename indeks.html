@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kuis Sejarah Indonesia - Tema Sejarah</title>
+  <style>
+    /* ---------- Theme: Sejarah / Klasik (perkamen) but high-contrast text ---------- */
+    :root{
+      --paper-1: #2b210f;
+      --paper-2: #251b0c;
+      --ink: #ffffff;
+      --muted: rgba(255,255,255,0.75);
+      --accent:#c79a5a;
+      --accent-2:#b07a42;
+      --success:#2ecc71;
+      --danger:#ff6b6b;
+      --warning:#f1c40f;
+      --card-shadow: rgba(0,0,0,0.75);
+      /* changed line to near-white for strong contrast */
+      --line: rgba(255,255,255,0.95);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: "Georgia", "Times New Roman", serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.02), transparent 8%),
+        linear-gradient(180deg, #0b0a08 0%, #1a1410 100%);
+      color:var(--ink);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+    }
+
+    .app { width:100%; max-width:920px; padding:18px; }
+
+    /* card */
+    .card{
+      position:relative;
+      background: linear-gradient(180deg, var(--paper-1), var(--paper-2));
+      border-radius:12px;
+      padding:26px;
+      box-shadow: 0 20px 60px var(--card-shadow);
+      border:6px solid rgba(255,255,255,0.04);
+      overflow:visible;
+      background-image:
+        linear-gradient(transparent, rgba(255,255,255,0.01)),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.01) 0 1px, transparent 1px 40px);
+    }
+
+    /* header */
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+      /* white dashed line for clearer separation */
+      border-bottom:1px dashed var(--line);
+      padding-bottom:12px;
+    }
+    .brand { display:flex; gap:14px; align-items:center; }
+    .seal{
+      width:56px; height:56px;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.06), transparent 20%),
+                 linear-gradient(180deg,var(--accent),var(--accent-2));
+      display:flex; align-items:center; justify-content:center;
+      color: #fff; font-weight:800; font-family: "Georgia", serif;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.5), inset 0 -4px 10px rgba(0,0,0,0.25);
+    }
+    h1{ margin:0; font-size:20px; color:var(--ink); letter-spacing:0.2px }
+    .meta{ color:var(--muted); font-size:13px }
+
+    /* start */
+    .start-center{ text-align:center; padding:8px 6px }
+    input[name="player"]{
+      width:70%;
+      max-width:420px;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color:var(--ink);
+      outline:none;
+      font-size:15px;
+      margin-top:12px;
+      font-family:inherit;
+    }
+
+    .controls{ margin-top:12px; display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap }
+    .btn {
+      display:inline-block;
+      padding:10px 16px;
+      border-radius:10px;
+      border:2px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      color:var(--ink);
+      font-weight:700;
+      cursor:pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+      transition: transform .12s ease, box-shadow .12s ease;
+      font-family:inherit;
+    }
+    .btn:hover{ transform:translateY(-3px); box-shadow: 0 14px 30px rgba(0,0,0,0.45) }
+    .btn.ghost{ background:transparent; color:var(--muted); border-color:var(--line) }
+    .btn.primary{
+      background: linear-gradient(180deg,var(--accent),var(--accent-2));
+      color:#fff;
+      border-color: rgba(0,0,0,0.08);
+    }
+
+    /* quiz */
+    #quizScreen { display:none; margin-top:14px; }
+    .top-row{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding-bottom:12px; margin-bottom:12px;
+      border-bottom:1px dashed var(--line); /* white dashed */
+    }
+    .timer{
+      color:var(--ink);
+      font-weight:800;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      padding:8px 10px;
+      border-radius:8px;
+      border:1px solid var(--line);
+    }
+    .progress{ color:var(--muted); font-size:13px }
+
+    .question {
+      font-size:18px;
+      font-weight:800;
+      margin:12px 0;
+      color:var(--ink);
+      text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    }
+
+    .options{ display:flex; flex-direction:column; gap:12px; margin-top:6px }
+
+    .opt{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:10px;
+      padding:14px 16px;
+      cursor:pointer;
+      color:var(--ink);
+      font-weight:700;
+      border:1px solid var(--line);
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s;
+      position:relative;
+      overflow:hidden;
+      font-family:inherit;
+    }
+    .opt:hover{
+      transform: translateY(-6px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+      border-color: rgba(255,255,255,0.85);
+    }
+    .opt.correct{
+      border-color: rgba(46,204,113,0.32);
+      box-shadow: 0 10px 30px rgba(46,204,113,0.06);
+      background: linear-gradient(180deg, rgba(46,204,113,0.04), rgba(255,255,255,0.02));
+    }
+    .opt.wrong{
+      border-color: rgba(255,107,107,0.32);
+      box-shadow: 0 10px 30px rgba(255,107,107,0.06);
+      background: linear-gradient(180deg, rgba(255,107,107,0.03), rgba(255,255,255,0.01));
+    }
+
+    /* notif / stamp */
+    .stamp{
+      display:inline-block;
+      font-weight:900;
+      padding:8px 12px;
+      border-radius:6px;
+      font-family: "Georgia", serif;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+    }
+    .stamp.correct{ background: rgba(46,204,113,0.12); color:var(--success); border:1px solid rgba(46,204,113,0.18) }
+    .stamp.wrong{ background: rgba(255,107,107,0.08); color:var(--danger); border:1px solid rgba(255,107,107,0.12) }
+    .stamp.timeout{ background: rgba(255,165,0,0.08); color:var(--warning); border:1px solid rgba(255,165,0,0.12) }
+
+    #resultScreen{ display:none; text-align:center; margin-top:12px }
+    .result-score{ font-size:20px; font-weight:800; color:var(--ink) }
+    .small{ font-size:13px; color:var(--muted) }
+
+    .footer{ margin-top:18px; border-top:1px dashed var(--line); padding-top:12px; display:flex; justify-content:space-between; color:var(--muted); font-size:13px }
+
+    /* small helper for "lihat semua soal" window */
+    .all-questions-pre{ font-family:Georgia,serif;font-size:15px;white-space:pre-wrap;color:#fff;background:#111;padding:16px; }
+
+    @media (max-width:780px){
+      .app{ padding:12px }
+      input[name="player"]{ width:100% }
+      .top-row{ flex-direction:column; align-items:flex-start; gap:8px }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card" id="mainCard">
+      <div class="header">
+        <div class="brand">
+          <div class="seal">KS</div>
+          <div>
+            <h1>Kuis Sejarah Indonesia</h1>
+            <div class="meta small">20 soal acak dari bank soal (SD / SMP / SMK)</div>
+          </div>
+        </div>
+        <div class="meta small">oleh: Kamu</div>
+      </div>
+
+      <!-- START -->
+      <div id="startScreen" class="start-center">
+        <p class="small">Masukkan nama untuk memulai kuis:</p>
+        <input name="player" id="playerName" placeholder="Nama kamu..." autocomplete="off" />
+        <div class="controls">
+          <button id="startBtn" class="btn primary" onclick="startQuiz()">🚀 Mulai Kuis</button>
+          <button class="btn ghost" onclick="showAllQuestions()">📚 Lihat Semua Soal</button>
+          <button class="btn" onclick="toggleSettings()">⚙️ Pengaturan</button>
+        </div>
+
+        <div id="settings" style="display:none;margin-top:12px;text-align:left;color:var(--muted)">
+          <label style="display:block;margin-bottom:8px"><input type="checkbox" id="shufflePool" checked /> Acak pool soal tiap game</label>
+          <label style="display:block;margin-bottom:8px">Jumlah soal tiap game:
+            <select id="perGame" style="margin-left:8px">
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20" selected>20</option>
+              <option value="30">30</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div id="quizScreen">
+        <div class="top-row">
+          <div class="timer" id="timer">⏳ Waktu: 15s</div>
+          <div class="progress" id="progress">Soal 1 / 20</div>
+        </div>
+
+        <div id="questionCard">
+          <div class="question" id="questionText">Pertanyaan muncul di sini</div>
+          <div class="options" id="options"></div>
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div id="resultScreen">
+        <div class="result-score" id="resultText">Skor kamu</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px">
+          <button class="btn" onclick="showScore()">📊 Lihat Nilai</button>
+          <button class="btn ghost" onclick="location.reload()">🔄 Main Lagi</button>
+        </div>
+        <p id="scoreDetail" class="small" style="margin-top:12px; display:none"></p>
+      </div>
+
+      <div class="footer">
+        <div>Durasi tiap soal: <span id="perQuestionTime">15</span> detik</div>
+        <div>Soal acak tiap permainan</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- notification center -->
+  <div id="notif" style="position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:999;"></div>
+
+  <script>
+    /********* Data soal (campuran SD/SMP/SMK) *********/
+    let rawQuestions = [
+      /* --- SD basic (1-20) --- */
+      { q:"Kapan Indonesia memproklamasikan kemerdekaan?", opts:["17 Agustus 1945","1 Juni 1945","10 November 1945","20 Mei 1908"], a:"17 Agustus 1945" },
+      { q:"Di kota mana Proklamasi Kemerdekaan dibacakan?", opts:["Jakarta","Yogyakarta","Surabaya","Bandung"], a:"Jakarta" },
+      { q:"Siapa yang membacakan teks Proklamasi?", opts:["Soekarno","Mohammad Hatta","Sayuti Melik","Sudirman"], a:"Soekarno" },
+      { q:"Siapa wakil presiden pertama RI?", opts:["Mohammad Hatta","Sutan Sjahrir","Sudirman","Soeharto"], a:"Mohammad Hatta" },
+      { q:"Apa nama bendera Indonesia?", opts:["Sang Saka Merah Putih","Sang Saka Biru Putih","Merah Hitam","Emas Putih"], a:"Sang Saka Merah Putih" },
+      { q:"Lambang negara Indonesia adalah…", opts:["Garuda Pancasila","Singa Merah","Bunga Melati","Naga Emas"], a:"Garuda Pancasila" },
+      { q:"Berapa sila dalam Pancasila?", opts:["5","4","6","3"], a:"5" },
+      { q:"Tanggal peringatan Hari Pahlawan setiap tahun?", opts:["10 November","17 Agustus","28 Oktober","1 Juni"], a:"10 November" },
+      { q:"Sumpah Pemuda dikumandangkan pada tahun?", opts:["1928","1908","1945","1930"], a:"1928" },
+      { q:"Siapa pahlawan wanita dari Jepara yang memperjuangkan pendidikan?", opts:["R.A. Kartini","Cut Nyak Dien","Cut Meutia","Martha Christina"], a:"R.A. Kartini" },
+      { q:"Apa nama kerajaan Hindu tertua di Nusantara yang tercatat dalam prasasti?", opts:["Kutai","Majapahit","Sriwijaya","Mataram"], a:"Kutai" },
+      { q:"Kerajaan Sriwijaya berpusat di pulau…", opts:["Sumatra","Jawa","Kalimantan","Sulawesi"], a:"Sumatra" },
+      { q:"Apa nama lagu kebangsaan Indonesia?", opts:["Indonesia Raya","Hari Merdeka","Bendera Kita","Tanah Air"], a:"Indonesia Raya" },
+      { q:"Peristiwa apa yang diperingati pada 28 Oktober?", opts:["Sumpah Pemuda","Hari Pahlawan","Hari Pendidikan","Hari Proklamasi"], a:"Sumpah Pemuda" },
+      { q:"Siapa pahlawan dari Aceh yang terkenal melawan Belanda?", opts:["Cut Nyak Dien","Pattimura","Teuku Umar","Diponegoro"], a:"Cut Nyak Dien" },
+      { q:"Siapa tokoh yang mendirikan Muhammadiyah?", opts:["KH Ahmad Dahlan","Ki Hajar Dewantara","Sukarno","Hatta"], a:"KH Ahmad Dahlan" },
+      { q:"Organisasi Boedi Oetomo lahir pada tahun…", opts:["1908","1912","1928","1898"], a:"1908" },
+      { q:"Apa fungsi pasukan PETA pada masa pendudukan Jepang?", opts:["Milisi lokal (Pembela Tanah Air)","Pemerintah sipil","Organisasi pelajar","Partai politik"], a:"Milisi lokal (Pembela Tanah Air)" },
+      { q:"Lambang Sumpah Pemuda menekankan persatuan berdasarkan…", opts:["Tanah air, bangsa, bahasa","Agama dan suku","Golongan politik","Status sosial"], a:"Tanah air, bangsa, bahasa" },
+
+      /* --- SMP mid (21-50) --- */
+      { q:"Siapa penulis naskah 'Indonesia Menggugat'?", opts:["Ernest Douwes Dekker","Soekarno","Hatta","Sutan Sjahrir"], a:"Ernest Douwes Dekker" },
+      { q:"Konferensi Asia-Afrika pertama diselenggarakan di kota…", opts:["Bandung","Jakarta","Yogyakarta","Surabaya"], a:"Bandung" },
+      { q:"Perjanjian Linggarjati dibuat antara Indonesia dan…", opts:["Belanda","Portugal","Inggris","Spanyol"], a:"Belanda" },
+      { q:"Apa tujuan Perjanjian Renville?", opts:["Menetapkan garis demarkasi dan gencatan senjata","Mendirikan pemerintahan baru","Pengakuan kemerdekaan penuh","Perdagangan"], a:"Menetapkan garis demarkasi dan gencatan senjata" },
+      { q:"Peristiwa Bandung Lautan Api terjadi pada tahun…", opts:["1946","1945","1947","1948"], a:"1946" },
+      { q:"Apa nama badan yang menyusun UUD 1945 pada awal kemerdekaan?", opts:["PPKI","BPUPKI","KNIP","BKR"], a:"PPKI" },
+      { q:"Tokoh yang dikenal sebagai Bapak Pendidikan Nasional adalah…", opts:["Ki Hajar Dewantara","KH Ahmad Dahlan","Sutan Sjahrir","Sukarno"], a:"Ki Hajar Dewantara" },
+      { q:"Peristiwa G30S/PKI terjadi pada tahun…", opts:["1965","1955","1975","1960"], a:"1965" },
+      { q:"Apa nama pertempuran besar di Surabaya 1945?", opts:["Pertempuran Surabaya","Bandung Lautan Api","Serangan Umum 1 Maret","Agresi Militer Belanda"], a:"Pertempuran Surabaya" },
+      { q:"Siapa pemimpin yang terkenal memimpin pertempuran Ambarawa?", opts:["Jenderal Sudirman","Bung Tomo","Affandi","Sudirman"], a:"Jenderal Sudirman" },
+      { q:"Konferensi Meja Bundar (KMB) menghasilkan…", opts:["Pengakuan kedaulatan RI (1949)","Deklarasi perang","Pembagian wilayah VOC","Perjanjian dagang"], a:"Pengakuan kedaulatan RI (1949)" },
+      { q:"Siapa tokoh yang memimpin pemberontakan Madiun 1948?", opts:["Musso","Tan Malaka","Sutan Sjahrir","Hatta"], a:"Musso" },
+      { q:"Trikora bertujuan merebut…", opts:["Irian Barat (Papua)","Malaya","Timor Leste","Sulawesi Utara"], a:"Irian Barat (Papua)" },
+      { q:"Perbedaan UUD 1945 dan UUDS 1950: UUDS menerapkan…", opts:["Sistem parlementer","Sistem presidensial","Monarki","Federasi"], a:"Sistem parlementer" },
+      { q:"Apa nama sistem tanam paksa Belanda?", opts:["Cultuurstelsel","Tanam Paksu","Rotasi Tanam","Swadeshi"], a:"Cultuurstelsel" },
+      { q:"Siapa yang mengetik naskah proklamasi?", opts:["Sayuti Melik","Sutan Sjahrir","Soepomo","Achmad Soebardjo"], a:"Sayuti Melik" },
+      { q:"Siapa presiden kedua RI?", opts:["Soeharto","Soekarno","Habibie","Gus Dur"], a:"Soeharto" },
+      { q:"Tanggal peringatan pertempuran Surabaya?", opts:["10 November","17 Agustus","28 Oktober","1 Juni"], a:"10 November" },
+      { q:"Apa nama 'Taman Siswa' didirikan oleh?", opts:["Ki Hajar Dewantara","KH Ahmad Dahlan","Sukarno","Hatta"], a:"Ki Hajar Dewantara" },
+      { q:"Peristiwa Serangan Umum 1 Maret 1949 terjadi di…", opts:["Solo (Surakarta)","Yogyakarta","Jakarta","Medan"], a:"Solo (Surakarta)" },
+
+      /* --- SMK / lanjutan (51-80) --- */
+      { q:"Siapa Perdana Menteri pertama Republik Indonesia (Kabinet Sjahrir)?", opts:["Sutan Sjahrir","Sukarno","Hatta","Soeharto"], a:"Sutan Sjahrir" },
+      { q:"Apa yang dimaksud 'Politik Etis' Belanda?", opts:["Kebijakan kompensasi berupa pendidikan dan infrastruktur","Kebijakan penjarahan","Pembentukan VOC","Politik ekspor"], a:"Kebijakan kompensasi berupa pendidikan dan infrastruktur" },
+      { q:"Perang Diponegoro (1825–1830) dipicu oleh…", opts:["Kebijakan pajak dan campur tangan Belanda","Pertikaian suku","Perang agama","Krisis pangan"], a:"Kebijakan pajak dan campur tangan Belanda" },
+      { q:"Peran VOC di Nusantara pada abad ke-17 adalah…", opts:["Perdagangan rempah dan monopoli dagang","Pendidikan massa","Pemerintahan modern","Pertanian besar"], a:"Perdagangan rempah dan monopoli dagang" },
+      { q:"Setelah bubarnya VOC (1799), pemerintahan digantikan oleh…", opts:["Pemerintahan Hindia Belanda di bawah pusat Belanda","VOC tetap berlanjut","Kerajaan Nusantara","Pemerintahan Jepang"], a:"Pemerintahan Hindia Belanda di bawah pusat Belanda" },
+      { q:"Perjanjian Giyanti (1755) mengakibatkan…", opts:["Pembagian Mataram menjadi Yogyakarta & Surakarta","Persatuan Jawa","Akhir VOC","Kemerdekaan Indonesia"], a:"Pembagian Mataram menjadi Yogyakarta & Surakarta" },
+      { q:"Apa latar belakang Indische Partij (1912)?", opts:["Kaum intelektual pro-kemerdekaan di perantauan Belanda","Pengembangan perdagangan","Organisasi militer","Sekolah baru"], a:"Kaum intelektual pro-kemerdekaan di perantauan Belanda" },
+      { q:"Rengasdengklok terkait dengan…", opts:["Upaya memindahkan Soekarno-Hatta agar proklamasi segera dilaksanakan","Perjanjian dagang","Kongres pemuda","Pertempuran besar"], a:"Upaya memindahkan Soekarno-Hatta agar proklamasi segera dilaksanakan" },
+      { q:"Siapa dikenal 'Bapak koperasi Indonesia'?", opts:["Mohammad Hatta","Sukarno","Ki Hajar Dewantara","Sudirman"], a:"Mohammad Hatta" },
+      { q:"Hasil utama KMB 1949 adalah…", opts:["Belanda mengakui kedaulatan RI secara de jure","Pembentukan negara baru di Papua","Perjanjian militer","Perdagangan bebas"], a:"Belanda mengakui kedaulatan RI secara de jure" },
+      { q:"Siapa tokoh pejuang Aceh akhir 1800-an?", opts:["Teuku Umar & Cut Nyak Dien","Pattimura","Diponegoro","Sultan Hasanuddin"], a:"Teuku Umar & Cut Nyak Dien" },
+      { q:"Apa tujuan politik luar negeri non-blok Indonesia?", opts:["Menjaga kemerdekaan dari dua blok besar","Bergabung NATO","Menjadi satelit negara","Eksklusif dagang"], a:"Menjaga kemerdekaan dari dua blok besar" },
+      { q:"Apa itu Perjanjian Renville (1948)?", opts:["Perjanjian yang menetapkan garis demarkasi dan syarat gencatan senjata","Perjanjian perdagangan","Perjanjian maritim","Perjanjian pendidikan"], a:"Perjanjian yang menetapkan garis demarkasi dan syarat gencatan senjata" },
+      { q:"Penyebab DI/TII pada 1950-an salah satunya adalah…", opts:["Ketidakpuasan terhadap sentralisasi & ideologi","Masalah cuaca","Invasi asing","Krisis ekonomi global"], a:"Ketidakpuasan terhadap sentralisasi & ideologi" },
+      { q:"Siapa tokoh PRRI/Permesta pada 1958 secara garis besar?", opts:["Tokoh militer & politik daerah menentang pusat","Soekarno","Soeharto","Hatta"], a:"Tokoh militer & politik daerah menentang pusat" },
+      { q:"Apa dampak Cultuurstelsel bagi rakyat?", opts:["Eksploitasi dan penderitaan petani","Kemakmuran","Kemerdekaan dini","Perdagangan merata"], a:"Eksploitasi dan penderitaan petani" },
+      { q:"Apa peran BKR pada masa awal kemerdekaan?", opts:["Pembentukan inti pasukan keamanan sebelum TNI terbentuk","Organisasi perdagangan","Kelompok politik","Partai pemuda"], a:"Pembentukan inti pasukan keamanan sebelum TNI terbentuk" },
+
+      /* --- 81-100 tambahan --- */
+      { q:"Peran Sultan Agung di Jawa adalah…", opts:["Memperkuat Mataram & melawan VOC","Mendirikan VOC","Menyerah pada Belanda","Menjadi raja di Sumatra"], a:"Memperkuat Mataram & melawan VOC" },
+      { q:"Fungsi BPUPKI tahun 1945 adalah…", opts:["Membahas dasar negara & UUD menjelang kemerdekaan","Mengatur perdagangan","Mendirikan sekolah","Menjaga ketertiban"], a:"Membahas dasar negara & UUD menjelang kemerdekaan" },
+      { q:"Siapa yang mengusulkan Pancasila dalam pidato 1 Juni 1945?", opts:["Soekarno","Hatta","Soepomo","Sutan Sjahrir"], a:"Soekarno" },
+      { q:"Siapa pemimpin yang terkenal dari Bali (perjuangan kemerdekaan modern)?", opts:["I Gusti Ngurah Rai","Pattimura","Cut Nyak Dien","Sam Ratulangi"], a:"I Gusti Ngurah Rai" },
+      { q:"Apa arti Nasionalisme dalam konteks pergerakan awal?", opts:["Kesadaran bersama merdeka dari penjajahan","Dominasi asing","Kolonialisasi internal","Ekspansi wilayah"], a:"Kesadaran bersama merdeka dari penjajahan" },
+      { q:"Siapa pemimpin penting dalam Serangan Umum 1 Maret 1949?", opts:["Sudirman & pejuang lokal","Soekarno","Hatta","Soeharto"], a:"Sudirman & pejuang lokal" },
+      { q:"Apa arti 'Agresi Militer Belanda' 1947/1948?", opts:["Operasi militer Belanda melawan RI pasca-proklamasi","Perang dunia","Invasi Jepang","Perang sipil"], a:"Operasi militer Belanda melawan RI pasca-proklamasi" },
+      { q:"Peran H.O.S. Tjokroaminoto penting karena…", opts:["Mendidik pemimpin pergerakan (guru Soekarno dkk)","Menjadi raja","Pemimpin militer","Tokoh VOC"], a:"Mendidik pemimpin pergerakan (guru Soekarno dkk)" },
+      { q:"Siapa tokoh yang terkenal dari Sulawesi Utara?", opts:["Sam Ratulangi","Pattimura","Sultan Hasanuddin","Diponegoro"], a:"Sam Ratulangi" },
+      { q:"Siapa yang mengetik naskah proklamasi membantu Soekarno-Hatta?", opts:["Sayuti Melik","Achmad Soebardjo","Sutan Sjahrir","Soepomo"], a:"Sayuti Melik" }
+    ];
+
+    /* ---------- Sanitasi & deduplikasi ---------- */
+    function normalizeQuestions(raw){
+      const seen = new Set();
+      const list = [];
+      for(const item of raw){
+        const qtext = (item.q||"").trim();
+        if(!qtext) continue;
+        if(seen.has(qtext)) continue;
+        seen.add(qtext);
+        let opts = Array.isArray(item.opts) ? item.opts.map(s=>String(s).trim()) : [];
+        const oseen = new Set();
+        const uniq = [];
+        for(const o of opts){ if(!oseen.has(o)){ uniq.push(o); oseen.add(o); } }
+        const answer = String(item.a || "").trim();
+        if(answer && !oseen.has(answer)){ uniq.push(answer); oseen.add(answer); }
+        const fillers = ["Tidak Tahu","Tidak Benar","Pilihan Lain","Peristiwa Lain"];
+        let fi = 0;
+        while(uniq.length < 4 && fi < fillers.length){
+          const f = fillers[fi++] + (uniq.length);
+          if(!oseen.has(f)){ uniq.push(f); oseen.add(f); }
+        }
+        if(uniq.length > 4){
+          if(!uniq.slice(0,4).includes(answer)){
+            uniq = [answer].concat(uniq.filter(x=>x!==answer)).slice(0,4);
+          } else {
+            uniq = uniq.slice(0,4);
+          }
+        }
+        list.push({ q: qtext, opts: uniq, a: answer || uniq[0] });
+      }
+      return list;
+    }
+
+    const allQuestions = normalizeQuestions(rawQuestions);
+
+    /* ---------- Settings & State ---------- */
+    let QUESTIONS_COUNT = 20;
+    let questions = [];
+    let current = 0;
+    let score = 0;
+    let player = "";
+    let timeLeft = 15;
+    let timer = null;
+
+    // elements
+    const startScreen = document.getElementById('startScreen');
+    const quizScreen = document.getElementById('quizScreen');
+    const resultScreen = document.getElementById('resultScreen');
+    const playerInput = document.getElementById('playerName');
+    const questionText = document.getElementById('questionText');
+    const optionsDiv = document.getElementById('options');
+    const timerEl = document.getElementById('timer');
+    const progressEl = document.getElementById('progress');
+    const notif = document.getElementById('notif');
+    const resultText = document.getElementById('resultText');
+    const scoreDetail = document.getElementById('scoreDetail');
+    const startBtn = document.getElementById('startBtn');
+    const perQuestionTimeEl = document.getElementById('perQuestionTime');
+
+    // helper notif
+    function showNotif(type, text){
+      notif.innerHTML = `<span class="stamp ${type}">${text}</span>`;
+      setTimeout(()=>{ notif.innerHTML = ''; }, 900);
+    }
+
+    // Settings toggles
+    function toggleSettings(){
+      const el = document.getElementById('settings');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    document.getElementById('perGame').addEventListener('change', (e)=>{
+      QUESTIONS_COUNT = parseInt(e.target.value,10) || 20;
+    });
+
+    /* ---------- pick random unique questions ---------- */
+    function pickRandomQuestions(){
+      const shufflePool = document.getElementById('shufflePool') ? document.getElementById('shufflePool').checked : true;
+      let pool = allQuestions.slice();
+      if(shufflePool){
+        for(let i=pool.length-1;i>0;i--){
+          const j = Math.floor(Math.random()*(i+1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+      }
+      return pool.slice(0, Math.min(QUESTIONS_COUNT, pool.length));
+    }
+
+    /* ---------- Quiz flow ---------- */
+    function startQuiz(){
+      const name = playerInput.value.trim();
+      if(!name){
+        showNotif('wrong','⚠️ Masukkan nama dulu!');
+        return;
+      }
+      player = name;
+      QUESTIONS_COUNT = parseInt(document.getElementById('perGame').value,10) || 20;
+      questions = pickRandomQuestions();
+      current = 0;
+      score = 0;
+      startScreen.style.display = 'none';
+      resultScreen.style.display = 'none';
+      quizScreen.style.display = 'block';
+      scoreDetail.style.display = 'none';
+      // reset per question time display (still 15 default)
+      perQuestionTimeEl.textContent = timeLeft = 15;
+      startBtn.blur();
+      renderQuestion();
+      startTimer();
+    }
+
+    function startTimer(){
+      // you can later expose a setting to change this value
+      timeLeft = parseInt(15,10);
+      timerEl.textContent = `⏳ Waktu: ${timeLeft}s`;
+      clearInterval(timer);
+      timer = setInterval(()=>{
+        timeLeft--;
+        timerEl.textContent = `⏳ Waktu: ${timeLeft}s`;
+        if(timeLeft <= 0){
+          clearInterval(timer);
+          Array.from(optionsDiv.children).forEach(c => c.style.pointerEvents = 'none');
+          const q = questions[current];
+          Array.from(optionsDiv.children).forEach(c => { if(c.textContent === q.a) c.classList.add('correct'); });
+          showNotif('timeout','⏰ Waktu Habis!');
+          setTimeout(()=> nextQuestion(), 900);
+        }
+      },1000);
+    }
+
+    function renderQuestion(){
+      const q = questions[current];
+      progressEl.textContent = `Soal ${current+1} / ${questions.length}`;
+      questionText.textContent = `❓ ${q.q}`;
+      optionsDiv.innerHTML = '';
+      const opts = q.opts.slice();
+      // shuffle options
+      for(let i=opts.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [opts[i], opts[j]] = [opts[j], opts[i]];
+      }
+      opts.forEach(opt=>{
+        const el = document.createElement('div');
+        el.className = 'opt';
+        el.textContent = opt;
+        el.onclick = ()=> handleAnswerClick(el, opt);
+        optionsDiv.appendChild(el);
+      });
+    }
+
+    function handleAnswerClick(el, selected){
+      clearInterval(timer);
+      const q = questions[current];
+      Array.from(optionsDiv.children).forEach(c => c.style.pointerEvents = 'none');
+      if(selected === q.a){
+        score += 5;
+        el.classList.add('correct');
+        showNotif('correct','✅ Benar!');
+      } else {
+        el.classList.add('wrong');
+        Array.from(optionsDiv.children).forEach(c => { if(c.textContent === q.a) c.classList.add('correct'); });
+        showNotif('wrong','❌ Salah!');
+      }
+      setTimeout(()=> nextQuestion(), 900);
+    }
+
+    function nextQuestion(){
+      current++;
+      if(current < questions.length){
+        renderQuestion();
+        startTimer();
+      } else {
+        endQuiz();
+      }
+    }
+
+    function endQuiz(){
+      clearInterval(timer);
+      quizScreen.style.display = 'none';
+      resultScreen.style.display = 'block';
+      resultText.textContent = `🎊 ${player}, skor kamu: ${score} dari ${questions.length*5} poin.`;
+      scoreDetail.style.display = 'none';
+      try{
+        const hist = JSON.parse(localStorage.getItem('quizHistory')||'[]');
+        hist.push({ name: player, score, max: questions.length*5, percent: Math.round((score/(questions.length*5))*100), date: (new Date()).toISOString() });
+        localStorage.setItem('quizHistory', JSON.stringify(hist.slice(-100)));
+      }catch(e){}
+    }
+
+    function showScore(){
+      const max = questions.length * 5;
+      const nilai = (score / max) * 100;
+      let grade = '';
+      if(nilai >= 85) grade = 'Sangat Baik';
+      else if(nilai >= 70) grade = 'Baik';
+      else if(nilai >= 50) grade = 'Cukup';
+      else grade = 'Perlu Latihan';
+      scoreDetail.style.display = 'block';
+      scoreDetail.textContent = `Nilai: ${nilai.toFixed(0)} | Kategori: ${grade}`;
+    }
+
+    function showAllQuestions(){
+      const lines = allQuestions.map((s,i)=> `${i+1}. ${s.q} — Jawab: ${s.a}`).join('\n\n');
+      const w = window.open();
+      w.document.write('<pre class="all-questions-pre">' + escapeHtml(lines) + '</pre>');
+      w.document.title = 'Daftar Soal';
+    }
+
+    function escapeHtml(s){
+      return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+
+    // expose functions
+    window.startQuiz = startQuiz;
+    window.showScore = showScore;
+    window.showAllQuestions = showAllQuestions;
+    window.toggleSettings = toggleSettings;
+
+    playerInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') startQuiz(); });
+
+    // quick safety: log how many unique questions we have
+    console.log("Total soal di bank:", allQuestions.length);
+  </script>
+</body>
+</html>
